@@ -85,6 +85,17 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
     return pivot_row;
 }
 
+/*make a column canonical
+Params:
+    matrix pointer;
+    row_size = size of the row
+    column_size = size of the column
+    pivot_row = row position of pivot
+    pivot_column = column_position of pivot
+
+returns:
+    void
+*/
 void make_column_canonical(double ***matrix, int row_size, int column_size, int pivot_row, int pivot_column)
 {
     double pivot = (*matrix)[pivot_row][pivot_column];
