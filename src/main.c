@@ -22,15 +22,16 @@ GtkWidget* grid_constraints;
 GtkWidget** varName_list;
 GtkWidget*** constraints_objFunction_matrix;
 
+GtkWidget *window;
 GtkWidget* varNames_window;
 GtkWidget* objective_contraints_window;
+
 int var_quantity;
 int constraint_quantity;
 
 int main(int argc, char* argv[])
 {
 	GtkBuilder *builder;
-	GtkWidget *window;
 
 	gtk_init(&argc, &argv);
 
@@ -61,6 +62,7 @@ int main(int argc, char* argv[])
 
 void show_var_names(void)
 {
+	gtk_widget_hide(window);
 	initialize_variables_constraints();
 	char default_name[5];
 
@@ -82,7 +84,7 @@ void show_var_names(void)
 
 void show_objfunction_constraints_fileds(void)
 {
-	gtk_window_close(GTK_WINDOW(varNames_window));
+	gtk_widget_hide(varNames_window);
 	gtk_widget_show(objective_contraints_window);
 
 	char label[20];
@@ -138,7 +140,7 @@ void fill_constraints_grid(void)
 		gtk_grid_attach(GTK_GRID(grid_constraints), 
 						constraints_objFunction_matrix[i][constraint_length], constraint_length, i + 1, 1, 1);
 
-		adjustment = gtk_adjustment_new(1.0, -999999, 999999, 1, 10, 0);
+		adjustment = gtk_adjustment_new(1, -999999, 999999, 1, 10, 0);
 		constraints_objFunction_matrix[i][constraint_length + 1] = gtk_spin_button_new(adjustment, 0, 4);
 		gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i][constraint_length + 1]), TRUE);
 
@@ -156,8 +158,34 @@ void fill_constraints_grid(void)
 
 void calculate_solution(void)
 {
-	double value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[0][0]));
-	printf("%.2f\n", value);
+	int extra_var_quantity = 0;
+	double value;
+	char* comparison;
+
+	for (int i = 1; i <= constraint_quantity; i++)
+	{
+		comparison = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(constraints_objFunction_matrix[i][var_quantity]));
+
+		if (comparison[0] == '>')
+			extra_var_quantity += 2;
+
+		else if (comparison[0] == '=')
+			extra_var_quantity++;
+
+	}
+	/*double **matrix = calloc(constraint_quantity + 1, sizeof(double));
+	for (int i = 0; i <= constraint_quantity; i++)
+	{
+		matrix[i] = calloc(var_quantity + extra_var_quantity, sizeof(double));
+		for (int j = 0; j < var_quantity + extra_var_quantity; j++)
+		{
+			value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i][j]));
+
+			if (i == 1)
+		}
+	}*/
+
+	printf("%c\n", c[0]);
 }
 
 void initialize_variables_constraints(void)
@@ -173,6 +201,20 @@ void initialize_variables_constraints(void)
 		constraints_objFunction_matrix[i] = calloc(var_quantity + 2, sizeof(GtkWidget*));
 	}
 }
+
+/*void change_varNames(void)
+{
+	//free(varName_list);
+	for (int i = 0; i < constraint_quantity + 1; i++)
+	{
+		free(constraints_objFunction_matrix[i]);
+	}
+	free(constraints_objFunction_matrix);
+
+	gtk_widget_hide(objective_contraints_window);
+
+	gtk_widget_show(varNames_window);
+}*/
 
 
 void close_varNames_window(void)
