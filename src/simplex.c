@@ -69,7 +69,7 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
     int pivot_row = -1;
     double current_value;
     double current_division;
-    for (int i = 1; i < column_size; i++)
+    for (int i = 2; i < column_size; i++)
     {
         current_value = matrix[i][simplex_column];
         if (current_value > 0)
@@ -105,7 +105,10 @@ void make_column_canonical(double ***matrix, int row_size, int column_size, int 
 
     for (int i = 0; i < column_size; i++)
     {
-        if (i != pivot_row)
+        if (i == 1)
+            continue;
+
+        else if (i != pivot_row)
         {
             current_value = (*matrix)[i][pivot_column];
             add_multiplied_row_to_another(&(*matrix), i, pivot_row, row_size, -1.0 * current_value);
