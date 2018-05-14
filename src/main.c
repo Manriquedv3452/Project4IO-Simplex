@@ -11,6 +11,7 @@ void add_variable(void);
 void initialize_variables_constraints(void);
 void show_objfunction_constraints_fileds(void);
 void fill_constraints_grid(void);
+double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int holgure_quantity);
 
 GtkWidget* input_var_quantity;
 GtkWidget* input_constraint_quantity;
@@ -158,8 +159,9 @@ void fill_constraints_grid(void)
 
 void calculate_solution(void)
 {
-	int extra_var_quantity = 0;
-	double value;
+	int excess_quantity = 0;
+	int artificial_quantity = 0;
+	int holgure_quantity = 0;
 	char* comparison;
 
 	for (int i = 1; i <= constraint_quantity; i++)
@@ -167,25 +169,98 @@ void calculate_solution(void)
 		comparison = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(constraints_objFunction_matrix[i][var_quantity]));
 
 		if (comparison[0] == '>')
-			extra_var_quantity += 2;
+		{
+			excess_quantity++;
+			artificial_quantity++;
+		}
+
 
 		else if (comparison[0] == '=')
-			extra_var_quantity++;
+			artificial_quantity++;
+
+		else
+			holgure_quantity++;
 
 	}
-	/*double **matrix = calloc(constraint_quantity + 1, sizeof(double));
-	for (int i = 0; i <= constraint_quantity; i++)
+
+
+	int total_variables = var_quantity + holgure_quantity + excess_quantity + artificial_quantity;
+	int row_length = total_variables + 2; //2 = Z column and Result column
+	int column_length = constraint_quantity + 2;
+
+	double** simplex_matrix = create_simplex_matrix(excess_quantity, artificial_quantity, holgure_quantity);
+
+	maximize_algorithm(&simplex_matrix, row_length, column_length);
+
+	for (int i = 0; i < constraint_quantity + 2; i++)
 	{
-		matrix[i] = calloc(var_quantity + extra_var_quantity, sizeof(double));
-		for (int j = 0; j < var_quantity + extra_var_quantity; j++)
+		for (int j = 0; j < row_length; j++)
 		{
-			value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i][j]));
-
-			if (i == 1)
+			printf("%.2f\t", simplex_matrix[i][j]);
 		}
-	}*/
+		printf("\n");
+	}
 
-	printf("%c\n", c[0]);
+}
+
+
+double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int holgure_quantity)
+{
+	char* comparison;
+	double value;
+
+	int total_variables = var_quantity + holgure_quantity + excess_quantity + artificial_quantity;
+	int row_length = total_variables + 2; //2 = Z column and Result column
+
+	int comparator_var;
+
+	double **simplex_matrix = calloc(constraint_quantity + 2, sizeof(double)); //2 = Z + row of quanity of M
+	for (int i = 2; i < constraint_quantity + 2; i++)
+	{
+		simplex_matrix[i] = calloc(row_length, sizeof(double));
+		for (int j = 1; j <= var_quantity; j++)
+		{
+			value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i - 1][j - 1]));
+			simplex_matrix[i][j] = value;
+			
+		}
+		comparison = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(constraints_objFunction_matrix[i - 1][var_quantity]));
+
+		if (comparison[0] == '>')
+		{
+			simplex_matrix[i][var_quantity + holgure_quantity + (i - 2)] = 1;	//e_i
+			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + (i - 2)] = 1;			//a_i
+		}
+
+		else if (comparison[0] == '=')
+			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + (i - 2)] = 1;		//a_i
+
+		else
+			simplex_matrix[i][var_quantity + i - 1] = 1;		//s_i
+
+		comparator_var = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i - 1][var_quantity + 1]));
+		simplex_matrix[i][row_length - 1] = comparator_var;
+
+	}
+
+	//valores de funcion objetivo
+	simplex_matrix[0] = calloc(row_length, sizeof(double));
+	
+	simplex_matrix[0][0] = 1;
+	for (int i = 1; i <= var_quantity; i++)
+	{
+		value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[0][i - 1]));
+		simplex_matrix[0][i] = value * -1;
+	} 
+
+	//put big M
+	simplex_matrix[1] = calloc(row_length, sizeof(double));
+	for (int i = artificial_quantity; i != 0; i--)
+	{
+		simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + (i)] = 1;
+	}
+
+	return simplex_matrix;
 }
 
 void initialize_variables_constraints(void)
