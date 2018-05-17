@@ -96,6 +96,7 @@
             <property name="receives_default">False</property>
             <property name="xalign">0</property>
             <property name="draw_indicator">True</property>
+            <property name="group">radio_minimize</property>
           </object>
           <packing>
             <property name="x">151</property>
@@ -202,24 +203,8 @@
             <signal name="clicked" handler="calculate_solution" swapped="no"/>
           </object>
           <packing>
-            <property name="x">519</property>
-            <property name="y">336</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="back_button">
-            <property name="label" translatable="yes">Volver</property>
-            <property name="name">start_button</property>
-            <property name="width_request">62</property>
-            <property name="height_request">35</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="change_varNames" swapped="no"/>
-          </object>
-          <packing>
-            <property name="x">399</property>
-            <property name="y">337</property>
+            <property name="x">409</property>
+            <property name="y">335</property>
           </packing>
         </child>
       </object>

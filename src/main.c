@@ -20,6 +20,9 @@ GtkWidget* grid_varName;
 GtkWidget* grid_objFunction;
 GtkWidget* grid_constraints;
 
+GtkWidget* radio_max;
+GtkWidget* radio_min;
+
 GtkWidget** varName_list;
 GtkWidget*** constraints_objFunction_matrix;
 
@@ -29,6 +32,8 @@ GtkWidget* objective_contraints_window;
 
 int var_quantity;
 int constraint_quantity;
+
+int is_max = 1;
 
 int main(int argc, char* argv[])
 {
@@ -49,6 +54,9 @@ int main(int argc, char* argv[])
 	grid_varName = GTK_WIDGET(gtk_builder_get_object(builder, "grid_varName"));
 	grid_objFunction = GTK_WIDGET(gtk_builder_get_object(builder, "grid_objFunction"));
 	grid_constraints = GTK_WIDGET(gtk_builder_get_object(builder, "grid_constraints"));
+
+	radio_max = GTK_WIDGET(gtk_builder_get_object(builder, "radio_maximize"));
+	radio_min = GTK_WIDGET(gtk_builder_get_object(builder, "radio_minimize"));
 	
 	//gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 	gtk_builder_connect_signals(builder, NULL);
@@ -109,7 +117,7 @@ void show_objfunction_constraints_fileds(void)
 		gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(constraints_objFunction_matrix[0][i]), TRUE);
 		gtk_grid_attach(GTK_GRID(grid_objFunction),constraints_objFunction_matrix[0][i], i, 1, 1, 1);
 	}
-	strcpy(label, "Valor a igualar:");
+	strcpy(label, "Valor a comparar:");
 	lbl_varName = gtk_label_new(label);
 	gtk_grid_attach(GTK_GRID(grid_constraints), lbl_varName, var_quantity + 1, 0, 1, 1);
 
@@ -161,6 +169,7 @@ void calculate_solution(void)
 {
 	int excess_quantity = 0;
 	int artificial_quantity = 0;
+	
 	int holgure_quantity = 0;
 	char* comparison;
 
@@ -190,8 +199,6 @@ void calculate_solution(void)
 
 	double** simplex_matrix = create_simplex_matrix(excess_quantity, artificial_quantity, holgure_quantity);
 
-	maximize_algorithm(&simplex_matrix, row_length, column_length);
-
 	for (int i = 0; i < constraint_quantity + 2; i++)
 	{
 		for (int j = 0; j < row_length; j++)
@@ -200,6 +207,14 @@ void calculate_solution(void)
 		}
 		printf("\n");
 	}
+
+
+	if (is_max)
+	{
+		maximize_algorithm(&simplex_matrix, row_length, column_length);
+
+	}
+
 
 }
 
@@ -213,8 +228,24 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 	int row_length = total_variables + 2; //2 = Z column and Result column
 
 	int comparator_var;
+	int artificial_pos = 1;
+	int holgure_pos = 1;
+	int excess_pos = 1;
 
 	double **simplex_matrix = calloc(constraint_quantity + 2, sizeof(double)); //2 = Z + row of quanity of M
+	simplex_matrix[0] = calloc(row_length, sizeof(double));
+	simplex_matrix[1] = calloc(row_length, sizeof(double));
+
+	//valores de funcion objetivo
+	simplex_matrix[0][0] = 1;
+	for (int i = 1; i <= var_quantity; i++)
+	{
+		value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[0][i - 1]));
+		simplex_matrix[0][i] = value * -1;
+	} 
+
+
+	//valores de las restricciones
 	for (int i = 2; i < constraint_quantity + 2; i++)
 	{
 		simplex_matrix[i] = calloc(row_length, sizeof(double));
@@ -228,40 +259,56 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 
 		if (comparison[0] == '>')
 		{
-			simplex_matrix[i][var_quantity + holgure_quantity + (i - 2)] = 1;	//e_i
-			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + (i - 2)] = 1;			//a_i
+			simplex_matrix[i][var_quantity + holgure_quantity + excess_pos++] = -1;	//e_is
+			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;			//a_i
+
+			if (is_max)
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = 1;		//M
+			else
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = -1;		//M
 		}
 
 		else if (comparison[0] == '=')
-			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + (i - 2)] = 1;		//a_i
+		{
+			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos++] = 1;		//a_i
+			if (is_max)
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = 1;		//M
+			else
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = -1;		//M
+		}
 
 		else
-			simplex_matrix[i][var_quantity + i - 1] = 1;		//s_i
+			simplex_matrix[i][var_quantity + holgure_pos++] = 1;		//s_i
 
 		comparator_var = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i - 1][var_quantity + 1]));
 		simplex_matrix[i][row_length - 1] = comparator_var;
 
 	}
 
-	//valores de funcion objetivo
-	simplex_matrix[0] = calloc(row_length, sizeof(double));
-	
-	simplex_matrix[0][0] = 1;
-	for (int i = 1; i <= var_quantity; i++)
-	{
-		value = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[0][i - 1]));
-		simplex_matrix[0][i] = value * -1;
-	} 
+
 
 	//put big M
-	simplex_matrix[1] = calloc(row_length, sizeof(double));
-	for (int i = artificial_quantity; i != 0; i--)
-	{
-		simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + (i)] = 1;
-	}
+//simplex_matrix[1] = calloc(row_length, sizeof(double));
+
+	/*if (is_max)
+		for (int i = artificial_quantity; i != 0; i--)
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + (i)] = 1;
+			
+	else
+		for (int i = artificial_quantity; i != 0; i--)
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + (i)] = -1;*/
 
 	return simplex_matrix;
 }
+
+void on_radio_button_toggled (GtkToggleButton *togglebutton)
+{
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radio_max)))
+        is_max = 1;
+	else
+		is_max = 0;
+}
+
 
 void initialize_variables_constraints(void)
 {
