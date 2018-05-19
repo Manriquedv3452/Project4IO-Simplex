@@ -199,22 +199,17 @@ void calculate_solution(void)
 
 	double** simplex_matrix = create_simplex_matrix(excess_quantity, artificial_quantity, holgure_quantity);
 
-	for (int i = 0; i < constraint_quantity + 2; i++)
-	{
-		for (int j = 0; j < row_length; j++)
-		{
-			printf("%.2f\t", simplex_matrix[i][j]);
-		}
-		printf("\n");
-	}
+	print_matrix(simplex_matrix, row_length, column_length);
+	printf("\n\n");
 
 
 	if (is_max)
-	{
-		maximize_algorithm(&simplex_matrix, row_length, column_length);
+		maximize_algorithm(&simplex_matrix, row_length, column_length, artificial_quantity, var_quantity);
 
-	}
-
+	else
+		minimize_algorithm(&simplex_matrix, row_length, column_length, artificial_quantity, var_quantity);
+		
+	print_matrix(simplex_matrix, row_length, column_length);
 
 }
 
@@ -263,18 +258,22 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;			//a_i
 
 			if (is_max)
-				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = 1;		//M
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = 1;		//M
 			else
-				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = -1;		//M
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = -1;		//M
+
+			artificial_pos++;
 		}
 
 		else if (comparison[0] == '=')
 		{
-			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos++] = 1;		//a_i
+			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;		//a_i
 			if (is_max)
-				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = 1;		//M
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = 1;		//M
 			else
-				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos++] = -1;		//M
+				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = -1;		//M
+
+			artificial_pos++;
 		}
 
 		else
@@ -378,15 +377,15 @@ void start_program(void)
 	print_matrix(matrix, 4, 7);
 	printf("------------------------------------------\n");
 
-	maximize_algorithm(&matrix, 7, 4);
+	maximize_algorithm(&matrix, 7, 4, 0, 0);
 
-	print_matrix(matrix, 4, 7);
+	print_matrix(matrix, 7, 4);
 }
 void print_matrix(double **matrix, int row_size, int column_size)
 {
-	for (int i = 0; i < row_size; i++)
+	for (int i = 0; i < column_size; i++)
 	{
-		for (int j = 0; j < column_size; j++)
+		for (int j = 0; j < row_size; j++)
 		{
 			printf("%.2f\t", matrix[i][j]);
 		}
