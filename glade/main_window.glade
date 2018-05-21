@@ -212,6 +212,10 @@
       </object>
     </child>
   </object>
+  <object class="GtkEntryBuffer" id="problem_name_buffer">
+    <property name="text" translatable="yes">Sin Nombre</property>
+    <property name="max_length">35</property>
+  </object>
   <object class="GtkAdjustment" id="spin_constraint_adjustment">
     <property name="lower">1</property>
     <property name="upper">10</property>
@@ -239,12 +243,13 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkEntry" id="problemName_entry">
-            <property name="name">problemName_entry</property>
+          <object class="GtkEntry" id="input_problem_name">
+            <property name="name">input_problem_name</property>
             <property name="width_request">100</property>
             <property name="height_request">80</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="buffer">problem_name_buffer</property>
             <property name="input_purpose">alpha</property>
           </object>
           <packing>

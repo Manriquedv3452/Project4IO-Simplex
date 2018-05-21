@@ -1,0 +1,345 @@
+\documentclass{beamer}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage[utf8]{inputenc}
+\usepackage{pgfplots}
+\usepackage{lmodern}
+\usepackage{newverbs}
+\usepackage{natbib}
+\pgfplotsset{compat=1.13}
+\setlength\parindent{20pt}
+\usetheme{Warsaw}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\usepackage{array, longtable}
+\usepackage{tabu}
+\usepackage{xcolor}
+\usepackage{colortbl}
+
+\setbeamercolor{normal text}{fg=white,bg=black!90}
+\setbeamercolor{structure}{fg=white}
+\setbeamercolor{alerted text}{fg=red!85!black}
+\setbeamercolor{item projected}{use=item,fg=black,bg=item.fg!35}
+\setbeamercolor*{palette primary}{use=structure,fg=structure.fg}
+\setbeamercolor*{palette secondary}{use=structure,fg=structure.fg!95!black}
+\setbeamercolor*{palette tertiary}{use=structure,fg=structure.fg!90!black}
+\setbeamercolor*{palette quaternary}{use=structure,fg=structure.fg!95!black,bg=green!80}
+\setbeamercolor*{framesubtitle}{fg=white}
+\setbeamercolor*{block title}{parent=structure,bg=black!60}
+\setbeamercolor*{block body}{fg=gray,bg=black!10}
+\setbeamercolor*{block title alerted}{parent=alerted text,bg=black!15}
+\setbeamercolor*{block title example}{parent=example text,bg=black!15}
+\title{Proyecto 4: Otro SIMPLEX m\'as}
+\subtitle{Investigaci\'on de Operaciones \newline Semestre 1}
+\author{Manrique J. Dur\'an V\'asquez - Randy M. Morales Gamboa}
+\institute{Instituto Tecnol\'ogico de Costa Rica}
+\date{\today}
+\newverbcommand{\kwverb}{\color{red}}{}
+\newverbcommand{\smverb}{\color{cyan}}{}
+\newverbcommand{\idverb}{\color{brown}}{}
+\newverbcommand{\assverb}{\color{orange}}{}
+\newverbcommand{\cverb}{\color{pink}}{}
+\newverbcommand{\opverb}{\color{green}}{}
+\newverbcommand{\slverb}{\color{olive}}{}
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}\begin{frame}
+\frametitle{Algoritmo SIMPLEX}El algoritmo SIMPLEX fue inventado por George Dantzig\end{frame}
+\begin{frame}
+\frametitle{Problema: Sin Nombre}
+\noindent \textbf{Maximizar:}\\
+\tab $Z = $ (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$}\newline\newline
+\textbf{Sujeto a:}\\
+\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\end{frame}
+\begin{frame}\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\end{frame}\begin{frame}
+\frametitle{Tabla Inicial}
+{
+\centering
+\begin{tabu}{|@{}*{20}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+$Z$& $x_{1}$ & $x_{2}$ & $x_{3}$ & $x_{4}$ & $x_{5}$ & $x_{6}$ & $x_{7}$ & $x_{8}$ \\\hline
+ 1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Inicial Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{20}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $s_{1}$& $s_{2}$& $s_{3}$& $s_{4}$& $s_{5}$& $s_{6}$& $s_{7}$& $s_{8}$\\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Inicial Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{20}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $s_{9}$& $s_{10}$& result\\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 1,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 \\\hline
+\rowcolor{black}%
+\end{tabu}
+}
+\end{frame}\begin{frame}
+\frametitle{Tabla Final}
+{
+\centering
+\begin{tabu}{|@{}*{20}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+$Z$& $x_{1}$ & $x_{2}$ & $x_{3}$ & $x_{4}$ & $x_{5}$ & $x_{6}$ & $x_{7}$ & $x_{8}$ \\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Final Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{20}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $s_{1}$& $s_{2}$& $s_{3}$& $s_{4}$& $s_{5}$& $s_{6}$& $s_{7}$& $s_{8}$\\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Final Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{20}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $s_{9}$& $s_{10}$& result\\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 \\\hline
+ 1,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 1,00 & 0,00 \\\hline
+\rowcolor{black}%
+\end{tabu}
+}
+\end{frame}\begin{frame}
+\frametitle{Problema: Sin Nombre}
+\noindent \textbf{Maximizar:}\\
+\tab $Z = $ (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$}\newline\newline
+\textbf{Sujeto a:}\\
+\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\end{frame}
+\begin{frame}\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\leq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\geq$ 1,00\newline\newline\tab (1,00)\textcolor{yellow}{$x_{1}$} + (1,00)\textcolor{yellow}{$x_{2}$} + (1,00)\textcolor{yellow}{$x_{3}$} + (1,00)\textcolor{yellow}{$x_{4}$} + (1,00)\textcolor{yellow}{$x_{5}$} + (1,00)\textcolor{yellow}{$x_{6}$} + (1,00)\textcolor{yellow}{$x_{7}$} + (1,00)\textcolor{yellow}{$x_{8}$} $\geq$ 1,00\newline\newline\end{frame}\begin{frame}
+\frametitle{Tabla Inicial}
+{
+\centering
+\begin{tabu}{|@{}*{22}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+$Z$& $x_{1}$ & $x_{2}$ & $x_{3}$ & $x_{4}$ & $x_{5}$ & $x_{6}$ & $x_{7}$ & $x_{8}$ \\\hline
+ 1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 & -1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Inicial Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{22}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $s_{1}$& $s_{2}$& $s_{3}$& $s_{4}$& $s_{5}$& $s_{6}$& $s_{7}$& $s_{8}$\\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Inicial Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{22}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $e_{1}$& $e_{2}$& $a_{1}$& $a_{2}$& result\\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ -1,00 & 0,00 & 1,00 & 0,00 & 1,00 \\\hline
+ 0,00 & -1,00 & 0,00 & 1,00 & 1,00 \\\hline
+\rowcolor{black}%
+\end{tabu}
+}
+\end{frame}\begin{frame}
+\frametitle{Tabla Final}
+{
+\centering
+\begin{tabu}{|@{}*{22}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+$Z$& $x_{1}$ & $x_{2}$ & $x_{3}$ & $x_{4}$ & $x_{5}$ & $x_{6}$ & $x_{7}$ & $x_{8}$ \\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Final Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{22}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $s_{1}$& $s_{2}$& $s_{3}$& $s_{4}$& $s_{5}$& $s_{6}$& $s_{7}$& $s_{8}$\\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+
+
+\rowcolor{black}%
+\end{tabu}
+}
+
+\end{frame}
+\begin{frame}
+\frametitle{Tabla Final Cont.}
+{
+\centering
+\begin{tabu}{|@{}*{22}{p{1.0cm}@{}|}}
+\rowcolor{black}%
+ $e_{1}$& $e_{2}$& $a_{1}$& $a_{2}$& result\\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 1,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ 0,00 & 0,00 & 0,00 & 0,00 & 0,00 \\\hline
+ -1,00 & 0,00 & 1,00 & 0,00 & 0,00 \\\hline
+ 0,00 & -1,00 & 0,00 & 1,00 & 0,00 \\\hline
+\rowcolor{black}%
+\end{tabu}
+}
+\end{frame}
+\end{document}

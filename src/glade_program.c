@@ -4,8 +4,6 @@
 #include <gtk/gtk.h>
 #include <string.h>
 #include "simplex.c"
-#include "structs.h"
-#include "latex_maker.c"
 
 void print_matrix(double **matrix, int row_size, int column_size);
 void start_program(void);
@@ -15,7 +13,6 @@ void show_objfunction_constraints_fileds(void);
 void fill_constraints_grid(void);
 double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int holgure_quantity);
 
-GtkWidget* input_problem_name;
 GtkWidget* input_var_quantity;
 GtkWidget* input_constraint_quantity;
 
@@ -38,13 +35,8 @@ int constraint_quantity;
 
 int is_max = 1;
 
-char problem_name[50];
-Variable *variable_list;
-
-int main(int argc, char* argv[])
+int start_glade_program(int argc, char* argv[])
 {
-	startPresentation();
-
 	GtkBuilder *builder;
 
 	gtk_init(&argc, &argv);
@@ -57,7 +49,6 @@ int main(int argc, char* argv[])
 	objective_contraints_window = GTK_WIDGET(gtk_builder_get_object(builder, "objective_contraints_window"));
 
 
-	input_problem_name = GTK_WIDGET(gtk_builder_get_object(builder, "input_problem_name"));
 	input_var_quantity = GTK_WIDGET(gtk_builder_get_object(builder, "input_var_quantity"));
 	input_constraint_quantity = GTK_WIDGET(gtk_builder_get_object(builder, "input_constraint_quantity"));
 	grid_varName = GTK_WIDGET(gtk_builder_get_object(builder, "grid_varName"));
@@ -74,8 +65,6 @@ int main(int argc, char* argv[])
 	gtk_widget_show(window);
 	gtk_main();
 
-	finishPresentation();
-
 
 	return 0;
 }
@@ -88,10 +77,10 @@ void show_var_names(void)
 
 	for (int i = 0; i < var_quantity; i++)
 	{
-		sprintf(default_name, "x_{%d}", i + 1);
+		sprintf(default_name, "x_%d", i + 1);
 		varName_list[i] = gtk_entry_new();
 		gtk_entry_set_width_chars(GTK_ENTRY(varName_list[i]), 10);
-		gtk_entry_set_max_length(GTK_ENTRY(varName_list[i]), 6);
+		gtk_entry_set_max_length(GTK_ENTRY(varName_list[i]), 16);
 		gtk_grid_attach(GTK_GRID(grid_varName), varName_list[i], 0, i, 1, 1);
 		gtk_entry_set_text(GTK_ENTRY(varName_list[i]), default_name);
 	}
@@ -205,26 +194,23 @@ void calculate_solution(void)
 
 
 	int total_variables = var_quantity + holgure_quantity + excess_quantity + artificial_quantity;
-	//varName_list = (GtkWidget**) realloc(varName_list, total_variables);
-	variable_list = calloc(total_variables + 1, sizeof(Variable));
-
 	int row_length = total_variables + 2; //2 = Z column and Result column
 	int column_length = constraint_quantity + 2;
 
 	double** simplex_matrix = create_simplex_matrix(excess_quantity, artificial_quantity, holgure_quantity);
 
-	write_original_problem(constraints_objFunction_matrix, var_quantity + 2, constraint_quantity + 1, problem_name, is_max, varName_list, var_quantity);
-	write_initial_table(simplex_matrix, row_length, column_length, var_quantity, holgure_quantity, excess_quantity,
-														artificial_quantity, varName_list);
+	print_matrix(simplex_matrix, row_length, column_length);
+	printf("\n\n");
+
 
 	if (is_max)
 		maximize_algorithm(&simplex_matrix, row_length, column_length, artificial_quantity, var_quantity);
 
 	else
 		minimize_algorithm(&simplex_matrix, row_length, column_length, artificial_quantity, var_quantity);
+		
+	print_matrix(simplex_matrix, row_length, column_length);
 
-	write_final_table(simplex_matrix, row_length, column_length, var_quantity, holgure_quantity, excess_quantity,
-														artificial_quantity, varName_list);
 }
 
 
@@ -270,9 +256,6 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 		{
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_pos++] = -1;	//e_is
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;			//a_i
-			
-			variable_list[var_quantity + holgure_quantity + excess_pos-1].type = 'e';
-			variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].type = 'a';
 
 			if (is_max)
 				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = 1;		//M
@@ -285,8 +268,6 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 		else if (comparison[0] == '=')
 		{
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;		//a_i
-			variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].type = 'a';
-
 			if (is_max)
 				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = 1;		//M
 			else
@@ -296,15 +277,10 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 		}
 
 		else
-		{
 			simplex_matrix[i][var_quantity + holgure_pos++] = 1;		//s_i
-			variable_list[var_quantity + holgure_pos - 1].type = 's';
-		}
-
 
 		comparator_var = gtk_spin_button_get_value(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i - 1][var_quantity + 1]));
 		simplex_matrix[i][row_length - 1] = comparator_var;
-
 
 	}
 
@@ -320,10 +296,8 @@ void on_radio_button_toggled (GtkToggleButton *togglebutton)
 }
 
 
-
 void initialize_variables_constraints(void)
 {
-	strcpy(problem_name, gtk_entry_get_text(GTK_ENTRY(input_problem_name)));
 	var_quantity = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input_var_quantity));
 	constraint_quantity = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input_constraint_quantity));
 	
@@ -390,7 +364,7 @@ void start_program(void)
 	print_matrix(matrix, 4, 7);
 	printf("------------------------------------------\n");
 
-	maximize_algorithm(&matrix, 7, 4, 0, 0);
+	//maximize_algorithm(&matrix, 7, 4, 0, 0);
 
 	print_matrix(matrix, 7, 4);
 }
