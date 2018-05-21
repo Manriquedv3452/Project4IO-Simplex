@@ -29,7 +29,10 @@ GtkWidget* radio_min;
 GtkWidget** varName_list;
 GtkWidget*** constraints_objFunction_matrix;
 
-GtkWidget *window;
+GtkWidget* calculate_button;
+
+GtkWidget* message_dialog;
+GtkWidget* window;
 GtkWidget* varNames_window;
 GtkWidget* objective_contraints_window;
 
@@ -63,6 +66,9 @@ int main(int argc, char* argv[])
 	grid_varName = GTK_WIDGET(gtk_builder_get_object(builder, "grid_varName"));
 	grid_objFunction = GTK_WIDGET(gtk_builder_get_object(builder, "grid_objFunction"));
 	grid_constraints = GTK_WIDGET(gtk_builder_get_object(builder, "grid_constraints"));
+
+	calculate_button = GTK_WIDGET(gtk_builder_get_object(builder, "start_button"));
+	message_dialog = GTK_WIDGET(gtk_builder_get_object(builder, "message_dialog"));
 
 	radio_max = GTK_WIDGET(gtk_builder_get_object(builder, "radio_maximize"));
 	radio_min = GTK_WIDGET(gtk_builder_get_object(builder, "radio_minimize"));
@@ -176,6 +182,7 @@ void fill_constraints_grid(void)
 }
 
 
+
 void calculate_solution(void)
 {
 	int excess_quantity = 0;
@@ -183,6 +190,9 @@ void calculate_solution(void)
 	
 	int holgure_quantity = 0;
 	char* comparison;
+
+	gtk_widget_hide(calculate_button);
+
 
 	for (int i = 1; i <= constraint_quantity; i++)
 	{
@@ -225,6 +235,9 @@ void calculate_solution(void)
 
 	write_final_table(simplex_matrix, row_length, column_length, var_quantity, holgure_quantity, excess_quantity,
 														artificial_quantity, varName_list);
+
+	gtk_widget_show(message_dialog);
+	gtk_widget_hide(objective_contraints_window);
 }
 
 
