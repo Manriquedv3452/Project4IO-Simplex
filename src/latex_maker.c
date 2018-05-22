@@ -549,7 +549,7 @@ void write_problem_solution(Variable *variable_list, int *variables_quantity, do
 			fprintf(file, "\\textcolor{yellow}{$%s$} $ = %.2f$", gtk_entry_get_text(GTK_ENTRY(varName_list[i])), 
 													matrix[variable_list[i + 1].pos_row_of_one][row_length - 1]);
 		else	
-			fprintf(file, "$\\textcolor{yellow}{$%s$} $ = 0$", gtk_entry_get_text(GTK_ENTRY(varName_list[i])));
+			fprintf(file, "\\textcolor{yellow}{$%s$} $ = 0$", gtk_entry_get_text(GTK_ENTRY(varName_list[i])));
 
 		fprintf(file, "\\\\\n");
 	}
