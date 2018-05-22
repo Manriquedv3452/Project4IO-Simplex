@@ -1,11 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+//#include <math.h>
 #include <gtk/gtk.h>
 #include <string.h>
-#include "simplex.c"
 #include "structs.h"
+#include "support_functions.h"
+
+GtkWidget** varName_list;
+int write_intermediate_tables = 0;
+Variable *variable_list;   
+
 #include "latex_maker.c"
+#include "simplex.c"
 
 void print_matrix(double **matrix, int row_size, int column_size);
 void start_program(void);
@@ -26,10 +33,10 @@ GtkWidget* grid_constraints;
 GtkWidget* radio_max;
 GtkWidget* radio_min;
 
-GtkWidget** varName_list;
 GtkWidget*** constraints_objFunction_matrix;
 
 GtkWidget* calculate_button;
+GtkWidget* intermediate_tables;
 
 GtkWidget* message_dialog;
 GtkWidget* window;
@@ -42,7 +49,6 @@ int constraint_quantity;
 int is_max = 1;
 
 char problem_name[50];
-Variable *variable_list;
 
 int main(int argc, char* argv[])
 {
@@ -66,6 +72,8 @@ int main(int argc, char* argv[])
 	grid_varName = GTK_WIDGET(gtk_builder_get_object(builder, "grid_varName"));
 	grid_objFunction = GTK_WIDGET(gtk_builder_get_object(builder, "grid_objFunction"));
 	grid_constraints = GTK_WIDGET(gtk_builder_get_object(builder, "grid_constraints"));
+
+	intermediate_tables = GTK_WIDGET(gtk_builder_get_object(builder, "check_tables"));
 
 	calculate_button = GTK_WIDGET(gtk_builder_get_object(builder, "start_button"));
 	message_dialog = GTK_WIDGET(gtk_builder_get_object(builder, "message_dialog"));
@@ -189,6 +197,9 @@ void calculate_solution(void)
 	int artificial_quantity = 0;
 	
 	int holgure_quantity = 0;
+
+	int *quantity_of_vars = calloc(4, sizeof(int));
+
 	char* comparison;
 
 	gtk_widget_hide(calculate_button);
@@ -227,14 +238,21 @@ void calculate_solution(void)
 	write_initial_table(simplex_matrix, row_length, column_length, var_quantity, holgure_quantity, excess_quantity,
 														artificial_quantity, varName_list);
 
+	quantity_of_vars[0] = var_quantity;
+	quantity_of_vars[1] = holgure_quantity;
+	quantity_of_vars[2] = excess_quantity;
+	quantity_of_vars[3] = artificial_quantity;
+
 	if (is_max)
-		maximize_algorithm(&simplex_matrix, row_length, column_length, artificial_quantity, var_quantity);
+		maximize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
 
 	else
-		minimize_algorithm(&simplex_matrix, row_length, column_length, artificial_quantity, var_quantity);
+		minimize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
 
 	write_final_table(simplex_matrix, row_length, column_length, var_quantity, holgure_quantity, excess_quantity,
 														artificial_quantity, varName_list);
+
+	write_problem_solution(variable_list, quantity_of_vars, simplex_matrix, row_length);
 
 	gtk_widget_show(message_dialog);
 	gtk_widget_hide(objective_contraints_window);
@@ -253,6 +271,8 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 	int artificial_pos = 1;
 	int holgure_pos = 1;
 	int excess_pos = 1;
+
+	char var_name[20];
 
 	double **simplex_matrix = calloc(constraint_quantity + 2, sizeof(double)); //2 = Z + row of quanity of M
 	simplex_matrix[0] = calloc(row_length, sizeof(double));
@@ -284,8 +304,12 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_pos++] = -1;	//e_is
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;			//a_i
 			
-			variable_list[var_quantity + holgure_quantity + excess_pos-1].type = 'e';
-			variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].type = 'a';
+			sprintf(var_name, "e_{%d}", excess_pos - 1);
+			strcpy(variable_list[var_quantity + holgure_quantity + excess_pos-1].name, var_name);
+
+			sprintf(var_name, "a_{%d}", artificial_pos);
+			strcpy(variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].name, var_name);
+			variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].pos_row_of_one = i;
 
 			if (is_max)
 				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = 1;		//M
@@ -298,7 +322,9 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 		else if (comparison[0] == '=')
 		{
 			simplex_matrix[i][var_quantity + holgure_quantity + excess_quantity + artificial_pos] = 1;		//a_i
-			variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].type = 'a';
+			sprintf(var_name, "a_{%d}", artificial_pos);
+			strcpy(variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].name, var_name);
+			variable_list[var_quantity + holgure_quantity + excess_quantity + artificial_pos].pos_row_of_one = i;
 
 			if (is_max)
 				simplex_matrix[1][var_quantity+ holgure_quantity + excess_quantity + artificial_pos] = 1;		//M
@@ -311,7 +337,12 @@ double** create_simplex_matrix(int excess_quantity, int artificial_quantity, int
 		else
 		{
 			simplex_matrix[i][var_quantity + holgure_pos++] = 1;		//s_i
-			variable_list[var_quantity + holgure_pos - 1].type = 's';
+
+			sprintf(var_name, "s_{%d}", holgure_pos - 1);
+			strcpy(variable_list[var_quantity + holgure_pos - 1].name, var_name);
+			variable_list[var_quantity + holgure_pos - 1].pos_row_of_one = i;
+			variable_list[var_quantity + holgure_pos - 1].in_base = 1;
+
 		}
 
 
@@ -330,6 +361,15 @@ void on_radio_button_toggled (GtkToggleButton *togglebutton)
         is_max = 1;
 	else
 		is_max = 0;
+}
+
+void on_check_button_toggled(GtkToggleButton *togglebutton)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(intermediate_tables)))
+		write_intermediate_tables = 1;
+
+	else	
+		write_intermediate_tables = 0;
 }
 
 
@@ -370,7 +410,7 @@ void close_varNames_window(void)
 	//gtk_
 }
 
-void start_program(void)
+/*void start_program(void)
 {
 	srand(time(NULL));
 	double **matrix = calloc(4, sizeof(double));
@@ -378,13 +418,13 @@ void start_program(void)
 	{
 		matrix[i] = calloc(7, sizeof(double));
 	}
-	/*for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 5; j++)
 		{
 			matrix[i][j] = rand() % 10 + 1;
 		}
-	}*/
+	}
 
 	//fabrica de puertas y ventanas example test
 	matrix[0][0] = 1;
@@ -406,7 +446,7 @@ void start_program(void)
 	maximize_algorithm(&matrix, 7, 4, 0, 0);
 
 	print_matrix(matrix, 7, 4);
-}
+}*/
 void print_matrix(double **matrix, int row_size, int column_size)
 {
 	for (int i = 0; i < column_size; i++)
