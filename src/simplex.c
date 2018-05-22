@@ -112,34 +112,36 @@ int get_most_negative_column(double **matrix, int row_size, int *quantity_of_var
     double current_bigM;
     double bigM_quantity = 0;
 
-    for (int i = 1; i < quantity_of_vars[0] + quantity_of_vars[1]; i++)
+    for (int i = 1; i < quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2] + 1; i++)
     {
         current_value = matrix[0][i];
         current_bigM = matrix[1][i];
-
-        if (double_is_equal(current_bigM, bigM_quantity))
+        if (double_is_equal(current_bigM, 0.000) || current_bigM > 0.000)
         {
-            if (current_value < most_negative)
+            if (double_is_equal(current_bigM, bigM_quantity))
             {
-                 most_negative = current_value;
-            
+                if (current_value < most_negative)
+                {
+                    most_negative = current_value;
+                
+                    bigM_quantity = current_bigM;
+                    most_negative_column = i;
+                }
+            }
+            else if (current_bigM < bigM_quantity && current_bigM < 0.000)
+            {
+                most_negative = current_value;
+                
                 bigM_quantity = current_bigM;
                 most_negative_column = i;
             }
-        }
-        else if (current_bigM < bigM_quantity)
-        {
-            most_negative = current_value;
-            
-            bigM_quantity = current_bigM;
-            most_negative_column = i;
-        }
-        else if (current_value < most_negative && double_is_equal(bigM_quantity, 0.000))
-        {
-            most_negative = current_value;
-            
-            bigM_quantity = current_bigM;
-            most_negative_column = i;
+            else if (current_value < most_negative && double_is_equal(bigM_quantity, 0.000))
+            {
+                most_negative = current_value;
+                
+                bigM_quantity = current_bigM;
+                most_negative_column = i;
+            }
         }
     }
     return most_negative_column;
@@ -286,7 +288,7 @@ returns:
 */
 void make_column_canonical(double ***matrix, int row_size, int column_size, int pivot_row, int pivot_column)
 {
-    //printf("\n\npivot_row: %d, pivot_column: %d", pivot_row, pivot_column);
+    printf("\n\npivot_row: %d, pivot_column: %d", pivot_row, pivot_column);
     double pivot = (*matrix)[pivot_row][pivot_column];
     double current_value;
 

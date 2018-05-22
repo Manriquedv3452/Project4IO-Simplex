@@ -243,6 +243,7 @@ void calculate_solution(void)
 	quantity_of_vars[2] = excess_quantity;
 	quantity_of_vars[3] = artificial_quantity;
 
+	print_matrix(simplex_matrix, row_length, column_length);
 	if (is_max)
 		maximize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
 
