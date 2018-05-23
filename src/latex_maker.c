@@ -69,7 +69,12 @@ void startPresentation(void)
 	fprintf(file,"%s\n%s\n", "\\begin{document}",
 			"\\begin{frame}\n\\maketitle\n\\end{frame}"
 			"\\begin{frame}\n\\frametitle{Algoritmo SIMPLEX}"
-			"El algoritmo SIMPLEX fue inventado por George Dantzig"
+			"El algoritmo SIMPLEX fue inventado por George Dantzig en 1947. "
+			"El SIMPLEX ayuda a encontrar la soluci\\'on \\'optima de un problema "
+			"de programaci\\'on lineal. Utiliza operaciones sobre matrices para encontrar la soluci\\'on "
+			"\\'optima o determinar que el problema no tine soluci\\'on.\\newline Parte de un \\textbf{v\\'ertice} "
+			"de la regi\\'on factible y se mueve a \\textbf{v\\'ertices adyacentes} que mejoren lo encontrado hasta "
+			"encontrar la condici\\'on de salida."
 			"\\end{frame}");
 }
 
