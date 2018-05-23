@@ -12,16 +12,24 @@ void write_original_problem(GtkWidget ***matrix, int row_length, int column_leng
 void write_initial_table(double **matrix, int row_length, int column_length, int var_quantity, int holgure_quantity,
 											int excess_quantity, int artificial_quantity, GtkWidget** varName_list);
 
-void write_final_table(double **matrix, int row_length, int column_length, int var_quantity, int holgure_quantity,
-											int excess_quantity, int artificial_quantity, GtkWidget** varName_list);
+void write_final_table(double **matrix, int row_length, int column_length, int* quantity_of_vars, GtkWidget** varName_list);
 
 void write_table_values(double** matrix, int row_limit, int column_length, int start_j);
 
-void write_intermediate_table(double **matrix, int row_length, int column_length, 
-				int *quantity_of_vars, GtkWidget** varName_list, int column_choose, int pivot_row);
-void write_intermediate_table_values(double** matrix, int row_limit, int column_length, int start_j, int column_choose, int pivot_row);
+void write_table_with_color(double **matrix, int row_length, int column_length, 
+				int *quantity_of_vars, GtkWidget** varName_list, int column_choose, 
+				int pivot_row, char* color, char* frame_title, Variable *variable_list, int variables_quantity);
+
+void write_cell_with_color(double** matrix, int row_limit, int column_length, int start_j, int column_choose, int pivot_row, char* column_color, Variable *variable_list);
 
 void write_problem_solution(Variable *variable_list, int *variables_quantity, double **matrix, int row_length);
+
+void write_not_bounded_solution(double **matrix, int row_length, int column_length, 
+				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
+				Variable *variable_list, int variables_quantity);
+
+void begin_frame(char* frame_title);
+void end_frame(void);
 
 int truncate(const char *path, off_t length);
 int ftruncate(int fd, off_t length);
@@ -290,7 +298,8 @@ void write_initial_table(double **matrix, int row_length, int column_length, int
 	fprintf(file, "\\end{frame}");
 }
 
-void write_intermediate_table_values(double** matrix, int row_limit, int column_length, int start_j, int column_choose, int pivot_row)
+void write_cell_with_color(double** matrix, int row_limit, int column_length, int start_j, 
+					int column_choose, int pivot_row, char* column_color, Variable* variable_list)
 {
 	fprintf(file, "\\\\\\hline\n");
 	for(int i = 0; i < column_length; i++)
@@ -299,39 +308,104 @@ void write_intermediate_table_values(double** matrix, int row_limit, int column_
 		{
 			for (int j = start_j; j < row_limit; j++)
 			{
-				if (double_is_equal(matrix[1][j], 0.000) || i != 0.0)
-					fprintf(file, "%s%s %.2f ", j == start_j ? "" : "&", j == column_choose ? "\\cellcolor{blue!20}" : "", matrix[i][j]);
-
-				else if (matrix[1][j] != 0 && double_is_equal(matrix[i][j], 0.000) && i == 0)
+				if (variable_list[j].in_base == 0 && strstr(variable_list[j].name, "a") != NULL)
 				{
-					if (double_is_equal(matrix[1][j], 1.000) || double_is_equal(matrix[1][j], -1.000))
-						fprintf(file, "%s%s %cM ", j == start_j ? "" : "&",  j == column_choose ? "\\cellcolor{blue!20}" : "", matrix[1][j] < 0 ? '-' : '+');
-					else 
-						fprintf(file, "%s%s %.1fM ", j == start_j ? "" : "&", j == column_choose ? "\\cellcolor{blue!20}" : "", matrix[1][j]);
+					if (j == start_j)
+						start_j = j+1;
+					continue;
 				}
 
-				else if (i == 0)
+				else
 				{
-					if (double_is_equal(matrix[1][j], 1.000) || double_is_equal(matrix[1][j], -1.000))
-						fprintf(file, "%s%s %.2f %c M", j == start_j ? "" : "&",  j == column_choose ? "\\cellcolor{blue!20}" : "", matrix[i][j], matrix[1][j] < 0 ? '-' : '+');
-					else 
-						fprintf(file, "%s%s %.2f %s %.1fM", j == start_j ? "" : "&",  j == column_choose ? "\\cellcolor{blue!20}" : "", matrix[i][j], matrix[1][j] > 0 ? "+" : "", matrix[1][j]);
+					if (double_is_equal(matrix[1][j], 0.000) || i != 0.0)
+					{
+						if (pivot_row == i && j == column_choose)
+							fprintf(file, "%s\\cellcolor{green!100} %.2f ", j == start_j ? "" : "&", matrix[i][j]);
+						
+						else if (j == column_choose)
+							fprintf(file, "%s\\cellcolor{%s!100} %.2f ", j == start_j ? "" : "&", column_color, matrix[i][j]);
+						
+						else
+							fprintf(file, "%s %.2f ", j == start_j ? "" : "&", matrix[i][j]);
+
+					}
+
+					else if (matrix[1][j] != 0 && double_is_equal(matrix[i][j], 0.000) && i == 0)
+					{
+						if (double_is_equal(matrix[1][j], 1.000) || double_is_equal(matrix[1][j], -1.000))
+						{
+							if (pivot_row == i && j == column_choose)
+								fprintf(file, "%s\\cellcolor{green!100} %cM ", j == start_j ? "" : "&", matrix[1][j] < 0 ? '-' : '+');
+
+							else if (j == column_choose)
+								fprintf(file, "%s\\cellcolor{%s!100} %cM ", j == start_j ? "" : "&", column_color, matrix[1][j] < 0 ? '-' : '+');
+							
+							else 
+								fprintf(file, "%s %cM ", j == start_j ? "" : "&", matrix[1][j] < 0 ? '-' : '+');
+						}
+							
+						else 
+							if (pivot_row == i && j == column_choose)
+								fprintf(file, "%s\\cellcolor{green!100} %.1fM ", j == start_j ? "" : "&", matrix[1][j]);
+
+							else if (j == column_choose)
+								fprintf(file, "%s\\cellcolor{%s!100} %.1fM ", j == start_j ? "" : "&", column_color, matrix[1][j]);
+
+							else
+								fprintf(file, "%s %.1fM ", j == start_j ? "" : "&", matrix[1][j]);
+					}
+
+					else if (i == 0)
+					{
+						if (double_is_equal(matrix[1][j], 1.000) || double_is_equal(matrix[1][j], -1.000))
+						{
+							if (pivot_row == i && j == column_choose)
+								fprintf(file, "%s\\cellcolor{green!100} %.2f %c M", j == start_j ? "" : "&", matrix[i][j], matrix[1][j] < 0 ? '-' : '+');
+
+							else if (j == column_choose)
+								fprintf(file, "%s\\cellcolor{%s!100} %.2f %c M", j == start_j ? "" : "&", column_color, matrix[i][j], matrix[1][j] < 0 ? '-' : '+');
+
+							else
+								fprintf(file, "%s %.2f %c M", j == start_j ? "" : "&", matrix[i][j], matrix[1][j] < 0 ? '-' : '+');
+						}
+						else 
+						{
+							if (pivot_row == i && j == column_choose)
+								fprintf(file, "%s\\cellcolor{green!100} %.2f %s %.1fM", j == start_j ? "" : "&", matrix[i][j], matrix[1][j] > 0 ? "+" : "", matrix[1][j]);
+
+							else if (j == column_choose)
+								fprintf(file, "%s\\cellcolor{%s!100} %.2f %s %.1fM", j == start_j ? "" : "&", column_color, matrix[i][j], matrix[1][j] > 0 ? "+" : "", matrix[1][j]);
+
+							else
+								fprintf(file, "%s %.2f %s %.1fM", j == start_j ? "" : "&", matrix[i][j], matrix[1][j] > 0 ? "+" : "", matrix[1][j]);
+						}
+					}
 				}
 			}
 			fprintf(file, "\\\\\\hline\n");
 		}
 	}
 }
-void write_intermediate_table(double **matrix, int row_length, int column_length, 
-				int *quantity_of_vars, GtkWidget** varName_list, int column_choose, int pivot_row)
+
+void begin_frame(char* frame_title)
+{
+		fprintf(file, "\\begin{frame}\n"
+				  "\\frametitle{%s}\n", frame_title);
+}
+
+void end_frame(void)
+{
+	fprintf(file, "\\end{frame}\n");
+}
+
+void write_table_with_color(double **matrix, int row_length, int column_length, 
+				int *quantity_of_vars, GtkWidget** varName_list, int column_choose, 
+				int pivot_row, char* color, char* frame_title, Variable *variable_list, int variables_quantity)
 {
 	int columns_latex_quantity = 0;
 	int columns_per_frame = 8;
 	int start_j = 0;
 	int current_columns = 0;
-
-	fprintf(file, "\\begin{frame}\n"
-				  "\\frametitle{Tabla Intermedia}\n");
 				
 	
 	fprintf(file, "{\n\\centering\n\\begin{tabu}{|@{}*{%d}{p{1.0cm}@{}|}}\n%s\n", row_length, "\\rowcolor{black}%");
@@ -348,12 +422,12 @@ void write_intermediate_table(double **matrix, int row_length, int column_length
 		if (columns_latex_quantity == columns_per_frame)
 		{
 			columns_latex_quantity = 0;
-			write_intermediate_table_values(matrix, current_columns, column_length, start_j, column_choose, pivot_row);
+			write_cell_with_color(matrix, current_columns, column_length, start_j, column_choose, pivot_row, color, variable_list);
 			start_j = current_columns;
 
 			fprintf(file, "\n%s", "\n\\rowcolor{black}%\n"
 			"\\end{tabu}\n}\n");
-			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{Tabla Intermedia Cont.}\n");
+			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{%s Cont.}\n", frame_title);
 			fprintf(file, "{\n\\centering\n\\begin{tabu}{|@{}*{%d}{p{1.0cm}@{}|}}\n%s\n", row_length, "\\rowcolor{black}%");
 		}
 	}
@@ -368,12 +442,12 @@ void write_intermediate_table(double **matrix, int row_length, int column_length
 		if (columns_latex_quantity == columns_per_frame)
 		{
 			columns_latex_quantity = 0;
-			write_intermediate_table_values(matrix, current_columns, column_length, start_j, column_choose, pivot_row);
+			write_cell_with_color(matrix, current_columns, column_length, start_j, column_choose, pivot_row, color, variable_list);
 			start_j = current_columns;
 			
 			fprintf(file, "\n%s", "\n\\rowcolor{black}%\n"
 			"\\end{tabu}\n}\n");
-			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{Tabla Intermedia Cont.}\n");
+			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{%s Cont.}\n", frame_title);
 			fprintf(file, "{\n\\centering\n\\begin{tabu}{|@{}*{%d}{p{1.0cm}@{}|}}\n%s\n", row_length, "\\rowcolor{black}%");
 		}
 	}
@@ -387,49 +461,53 @@ void write_intermediate_table(double **matrix, int row_length, int column_length
 		if (columns_latex_quantity == columns_per_frame)
 		{
 			columns_latex_quantity = 0;
-			write_intermediate_table_values(matrix, current_columns, column_length, start_j, column_choose, pivot_row);
+			write_cell_with_color(matrix, current_columns, column_length, start_j, column_choose, pivot_row, color, variable_list);
 			start_j = current_columns;
 			
 			fprintf(file, "\n%s", "\n\\rowcolor{black}%\n"
 			"\\end{tabu}\n}\n");
-			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{Tabla Intermedia Cont.}\n");
+			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{%s Cont.}\n", frame_title);
 			fprintf(file, "{\n\\centering\n\\begin{tabu}{|@{}*{%d}{p{1.0cm}@{}|}}\n%s\n", row_length, "\\rowcolor{black}%");
 		}
 	}
 
+
+	int var_he_total = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2];
 	for (int i = 0; i < quantity_of_vars[3]; i++)
 	{
-		fprintf(file, "%s $a_{%d}$", (columns_latex_quantity == 0) ? "" : "&", i + 1);
-		columns_latex_quantity++;
-		current_columns++;
-
-		if (columns_latex_quantity == columns_per_frame)
+		if (variable_list[var_he_total + i + 1].in_base)
 		{
-			columns_latex_quantity = 0;
-			write_intermediate_table_values(matrix, current_columns, column_length, start_j, column_choose, pivot_row);
-			start_j = current_columns;
-			
-			fprintf(file, "\n%s", "\n\\rowcolor{black}%\n"
-			"\\end{tabu}\n}\n");
-			fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{Tabla Intermedia Cont.}\n");
-			fprintf(file, "{\n\\centering\n\\begin{tabu}{|@{}*{%d}{p{1.0cm}@{}|}}\n%s\n", row_length, "\\rowcolor{black}%");
+			fprintf(file, "%s $a_{%d}$", (columns_latex_quantity == 0) ? "" : "&", i + 1);
+			columns_latex_quantity++;
+			current_columns++;
+
+			if (columns_latex_quantity == columns_per_frame)
+			{
+				columns_latex_quantity = 0;
+				write_cell_with_color(matrix, current_columns, column_length, start_j, column_choose, pivot_row, color, variable_list);
+				start_j = current_columns;
+				
+				fprintf(file, "\n%s", "\n\\rowcolor{black}%\n"
+				"\\end{tabu}\n}\n");
+				fprintf(file, "\n\\end{frame}\n\\begin{frame}\n\\frametitle{%s Cont.}\n", frame_title);
+				fprintf(file, "{\n\\centering\n\\begin{tabu}{|@{}*{%d}{p{1.0cm}@{}|}}\n%s\n", row_length, "\\rowcolor{black}%");
+			}
 		}
 	}
 
 	fprintf(file, "%s result", (columns_latex_quantity == 0) ? "" : "&");
 	current_columns++;
-	write_intermediate_table_values(matrix, current_columns, column_length, start_j, column_choose, pivot_row);
+
+	write_cell_with_color(matrix, row_length, column_length, start_j, column_choose, pivot_row, color, variable_list);
 
 
 	fprintf(file, "%s", "\\rowcolor{black}%\n"
 			"\\end{tabu}\n}\n");
 
-	fprintf(file, "\\end{frame}");
 }
 
 
-void write_final_table(double **matrix, int row_length, int column_length, int var_quantity, int holgure_quantity,
-											int excess_quantity, int artificial_quantity, GtkWidget** varName_list)
+void write_final_table(double **matrix, int row_length, int column_length, int* quantity_of_vars, GtkWidget** varName_list)
 {
 	int columns_latex_quantity = 0;
 	int columns_per_frame = 8;
@@ -445,7 +523,7 @@ void write_final_table(double **matrix, int row_length, int column_length, int v
 	fprintf(file, "$Z$");
 	current_columns++;
 
-	for (int i = 0; i < var_quantity; i++)
+	for (int i = 0; i < quantity_of_vars[0]; i++)
 	{
 		fprintf(file, "& $%s$ ", gtk_entry_get_text(GTK_ENTRY(varName_list[i]))); 
 		columns_latex_quantity++;
@@ -465,7 +543,7 @@ void write_final_table(double **matrix, int row_length, int column_length, int v
 	}
 
 
-	for (int i = 0; i < holgure_quantity; i++)
+	for (int i = 0; i < quantity_of_vars[1]; i++)
 	{
 		fprintf(file, "%s $s_{%d}$", (columns_latex_quantity == 0) ? "" : "&", i + 1);
 		columns_latex_quantity++;
@@ -484,7 +562,7 @@ void write_final_table(double **matrix, int row_length, int column_length, int v
 		}
 	}
 
-	for (int i = 0; i < excess_quantity; i++)
+	for (int i = 0; i < quantity_of_vars[2]; i++)
 	{
 		fprintf(file, "%s $e_{%d}$", (columns_latex_quantity == 0) ? "" : "&", i + 1);
 		columns_latex_quantity++;
@@ -503,7 +581,7 @@ void write_final_table(double **matrix, int row_length, int column_length, int v
 		}
 	}
 
-	for (int i = 0; i < artificial_quantity; i++)
+	for (int i = 0; i < quantity_of_vars[3]; i++)
 	{
 		fprintf(file, "%s $a_{%d}$", (columns_latex_quantity == 0) ? "" : "&", i + 1);
 		columns_latex_quantity++;
@@ -536,6 +614,7 @@ void write_final_table(double **matrix, int row_length, int column_length, int v
 
 void write_problem_solution(Variable *variable_list, int *variables_quantity, double **matrix, int row_length)
 {
+	int frame_size = 1;
 	fprintf(file, "\\begin{frame}\n"
 				  "\\frametitle{Solución}\n\\centering\n{");
 
@@ -552,18 +631,53 @@ void write_problem_solution(Variable *variable_list, int *variables_quantity, do
 			fprintf(file, "\\textcolor{yellow}{$%s$} $ = 0$", gtk_entry_get_text(GTK_ENTRY(varName_list[i])));
 
 		fprintf(file, "\\\\\n");
+
+		frame_size++;
+		if (frame_size == 16)
+		{
+			fprintf(file, "}\n\\end{frame}");
+			fprintf(file, "\\begin{frame}\n"
+				  "\\frametitle{Solución Cont.}\n\\centering\n{");
+		}
+
 	}
 
 	for (int i = variables_quantity[0] + 1; i < total_variables; i++)
 	{
 
 		if (variable_list[i].in_base)
+		{
 			fprintf(file, "\\textcolor{green}{$%s$} $ = %.2f$\\\\\n", variable_list[i].name, matrix[variable_list[i].pos_row_of_one][row_length - 1]);
+			frame_size++;
+		}
+		else if (variable_list[i].name[0] != 'a')
+		{	
+			fprintf(file, "\\textcolor{green}{$%s$} $ = 0$\\\\\n", variable_list[i].name);
+			frame_size++;
+		}
 
+		if (frame_size == 16)
+		{
+			fprintf(file, "}\n\\end{frame}");
+			fprintf(file, "\\begin{frame}\n"
+				  "\\frametitle{Solución Cont.}\n\\centering\n{");
+		}
 	}
 	fprintf(file, "}\n\\end{frame}");
 }
 
+
+void write_not_bounded_solution(double **matrix, int row_length, int column_length, 
+				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
+				Variable *variable_list, int variables_quantity)
+{
+	begin_frame("Soluci\\'on: NO ACOTADA");
+	fprintf(file, "Un problema es no acotado cuando al escoger el pivote las entradas son 0 o negativas.\\newline\\newline\n"
+					"En este problema en la "
+					"columna '%d', todas las celdas son 0 o negativas, se adjunta la tabla:\\newline\\newline\n", column_choose + 1);
+	 write_table_with_color(matrix, row_length, column_length, quantity_of_vars, varName_list, column_choose, -1, "red", "Soluci\\'on: NO ACOTADA", variable_list, variables_quantity);
+	 end_frame();
+}
 
 
 void finishPresentation(void)

@@ -243,16 +243,20 @@ void calculate_solution(void)
 	quantity_of_vars[2] = excess_quantity;
 	quantity_of_vars[3] = artificial_quantity;
 
-	print_matrix(simplex_matrix, row_length, column_length);
+	//print_matrix(simplex_matrix, row_length, column_length);
+
+
+	int is_optimal = 0;
 	if (is_max)
-		maximize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
+		is_optimal = maximize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
 
 	else
-		minimize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
+		is_optimal = minimize_algorithm(&simplex_matrix, row_length, column_length, quantity_of_vars);
 
-	write_final_table(simplex_matrix, row_length, column_length, var_quantity, holgure_quantity, excess_quantity,
-														artificial_quantity, varName_list);
-
+	if (is_optimal == 1)
+	{
+		write_final_table(simplex_matrix, row_length, column_length, quantity_of_vars, varName_list);
+	}
 	write_problem_solution(variable_list, quantity_of_vars, simplex_matrix, row_length);
 
 	gtk_widget_show(message_dialog);
