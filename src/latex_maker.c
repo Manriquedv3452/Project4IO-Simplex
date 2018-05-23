@@ -32,6 +32,12 @@ void write_not_feasible_solution(double **matrix, int row_length, int column_len
 				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
 				Variable *variable_list, int variables_quantity);
 
+void write_degenerate_problem(double **matrix, int row_length, int column_length, 
+				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
+				Variable *variable_list, int variables_quantity);
+
+void exchange_degenerate_problem(void);
+
 void begin_frame(char* frame_title);
 void end_frame(void);
 
@@ -39,6 +45,8 @@ int truncate(const char *path, off_t length);
 int ftruncate(int fd, off_t length);
 
 FILE *file;
+FILE *file_aux;
+FILE *file_aux2;
 int tab = 0;
 int keyCount = 0;
 int newLine = 0;
@@ -675,11 +683,11 @@ void write_not_bounded_solution(double **matrix, int row_length, int column_leng
 				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
 				Variable *variable_list, int variables_quantity)
 {
-	begin_frame("Soluci\\'on: NO ACOTADA");
+	begin_frame("Soluci\\'on: PROBLEMA NO ACOTADO");
 	fprintf(file, "Un problema es no acotado cuando al escoger el pivote las entradas son 0 o negativas.\\newline\\newline\n"
 					"En este problema en la "
-					"columna '%d', todas las celdas son 0 o negativas, se adjunta la tabla:\\newline\\newline\n", column_choose + 1);
-	 write_table_with_color(matrix, row_length, column_length, quantity_of_vars, varName_list, column_choose, -1, "red", "Soluci\\'on: NO ACOTADA", variable_list, variables_quantity);
+					"columna '%d', todas las celdas son 0 o negativas. Se adjunta la tabla:\\newline\\newline\n", column_choose + 1);
+	 write_table_with_color(matrix, row_length, column_length, quantity_of_vars, varName_list, column_choose, -1, "red", "Soluci\\'on: PROBLEMA NO ACOTADO", variable_list, variables_quantity);
 	 end_frame();
 }
 
@@ -691,9 +699,41 @@ void write_not_feasible_solution(double **matrix, int row_length, int column_len
 	fprintf(file, "Un problema tiene una soluci\\'on no factible cuando al menos una de las variables artificiales "
 					"queda en la base y no existen m\\'as columnas donde pivotear.\\newline\\newline\n"
 					"En este problema en la "
-					"columna '%d', se encuentra la variable artificial, se adjunta la tabla:\\newline\\newline\n", column_choose + 1);
+					"columna '%d', se encuentra la variable artificial. Se adjunta la tabla:\\newline\\newline\n", column_choose + 1);
 	 write_table_with_color(matrix, row_length, column_length, quantity_of_vars, varName_list, column_choose, -1, "red", "Soluci\\'on: NO FACTIBLE", variable_list, variables_quantity);
 	 end_frame();
+}
+
+void write_degenerate_problem(double **matrix, int row_length, int column_length, 
+				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
+				Variable *variable_list, int variables_quantity)
+{
+	file_aux = fopen("../latex/degenerated.txt", "w");
+	file_aux2 = file;
+	file = file_aux;
+
+	begin_frame("PROBLEMA DEGENERADO");
+	fprintf(file, "Un problema es \\textbf{degenerado} cuando una de las variables b\\'asicas valen 0 \\newline\\newline\n"
+					"En este problema en la "
+					"columna '%d', se encuentra la variable que equivale 0. Se adjunta la tabla:\\newline\\newline\n", column_choose + 1);
+	 write_table_with_color(matrix, row_length, column_length, quantity_of_vars, varName_list, column_choose, -1, "red", "PROBLEMA DEGENERADO", variable_list, variables_quantity);
+	end_frame();
+	file = file_aux2;
+	fclose(file_aux);
+}
+
+void exchange_degenerate_problem(void)
+{
+	char in_char;
+	file_aux = fopen("../latex/degenerated.txt", "r");
+	printf("IS HERE 1!\n");
+	while ((in_char = fgetc(file_aux)) != EOF)
+	{
+		fprintf(file, "%c", in_char);
+	}
+	fclose(file_aux);
+	printf("IS HERE 2!\n");
+	remove("../latex/degenerated.txt");
 }
 
 

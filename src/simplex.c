@@ -17,6 +17,7 @@ void make_column_canonical(double ***matrix, int row_size, int column_size, int 
 void make_artficials_canonical(double ***matrix, int row_size, int column_size, int* quantity_of_vars);
 void kick_out_var_from_base(Variable **variable_list, int total_variables, int pivot_row, int column_to_join);
 int get_artificial_column_in_base(double **matrix, int row_size, int column_size, int* quantity_of_vars);
+int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity);
 
 
 #define INFINIT 9999
@@ -28,13 +29,24 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
     int pivot_row;
 
     int artificial_column;
+    int degenerated_problem_column = -1;
 
     int total_variables = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2] + quantity_of_vars[3];
+    
     if (quantity_of_vars[3] != 0)
         make_artficials_canonical(&(*matrix), row_size, column_size, quantity_of_vars);
 
     while(1)
     {
+        if (degenerated_problem_column == -1)
+        {
+            degenerated_problem_column = verify_degenerated(*matrix, row_size, variable_list, total_variables);
+            if (degenerated_problem_column != -1)
+                write_degenerate_problem(*matrix, row_size, column_size, quantity_of_vars, 
+                            varName_list, degenerated_problem_column, variable_list, total_variables);
+
+        }
+
         column_to_maximize = get_most_negative_column(*matrix, row_size, quantity_of_vars);
        
         if (column_to_maximize == -1)
@@ -53,6 +65,11 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
         if (pivot_row == -1)
         {
             write_final_table(*matrix, row_size, column_size, quantity_of_vars, varName_list);
+            if (degenerated_problem_column != -1)
+            {
+                exchange_degenerate_problem();
+            }
+
              write_not_bounded_solution(*matrix, row_size, column_size, quantity_of_vars, 
                             varName_list, column_to_maximize, variable_list, total_variables);
             return -1;
@@ -79,11 +96,20 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
     if (artificial_column != -1)
     {
         write_final_table(*matrix, row_size, column_size, quantity_of_vars, varName_list);
+        if (degenerated_problem_column != -1)
+        {
+            exchange_degenerate_problem();
+        }
+
         write_not_feasible_solution(*matrix, row_size, column_size, quantity_of_vars, 
                             varName_list, artificial_column, variable_list, total_variables);
         return 0;
     }
-        
+    if (degenerated_problem_column != -1)
+    {
+        exchange_degenerate_problem();
+    }
+
     return 1;
 
 }
@@ -93,7 +119,9 @@ int minimize_algorithm(double ***matrix, int row_size, int column_size, int* qua
 {
     int column_to_minimize;
     int pivot_row;
+    int artificial_column;
     int total_variables = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2] + quantity_of_vars[3];
+    int degenerated_problem_column = -1;
     
     if (quantity_of_vars[3] != 0)
         make_artficials_canonical(&(*matrix), row_size, column_size, quantity_of_vars);
@@ -101,6 +129,17 @@ int minimize_algorithm(double ***matrix, int row_size, int column_size, int* qua
 
     while(1)
     {
+
+        if (degenerated_problem_column == -1)
+        {
+            degenerated_problem_column = verify_degenerated(*matrix, row_size, variable_list, total_variables);
+            if (degenerated_problem_column != -1)
+                write_degenerate_problem(*matrix, row_size, column_size, quantity_of_vars, 
+                            varName_list, degenerated_problem_column, variable_list, total_variables);
+   
+        }
+
+
         column_to_minimize = get_most_positive_column(*matrix, row_size, quantity_of_vars);
        
         if (column_to_minimize == -1)
@@ -120,6 +159,10 @@ int minimize_algorithm(double ***matrix, int row_size, int column_size, int* qua
          if (pivot_row == -1)
         {
             write_final_table(*matrix, row_size, column_size, quantity_of_vars, varName_list);
+            if (degenerated_problem_column != -1)
+            {
+                exchange_degenerate_problem();
+            }
              write_not_bounded_solution(*matrix, row_size, column_size, quantity_of_vars,
                  varName_list, column_to_minimize,  variable_list, total_variables);
             return -1;
@@ -139,9 +182,25 @@ int minimize_algorithm(double ***matrix, int row_size, int column_size, int* qua
 
 
         make_column_canonical(&(*matrix), row_size, column_size, pivot_row, column_to_minimize);
+    }
 
-       
+    artificial_column = get_artificial_column_in_base(*matrix, row_size, column_size, quantity_of_vars);
 
+    if (artificial_column != -1)
+    {
+        write_final_table(*matrix, row_size, column_size, quantity_of_vars, varName_list);
+        if (degenerated_problem_column != -1)
+        {
+            exchange_degenerate_problem();
+        }
+
+        write_not_feasible_solution(*matrix, row_size, column_size, quantity_of_vars, 
+                            varName_list, artificial_column, variable_list, total_variables);
+        return 0;
+    }
+    if (degenerated_problem_column != -1)
+    {
+        exchange_degenerate_problem();
     }
     return 1;
 }
@@ -414,4 +473,21 @@ void make_column_canonical(double ***matrix, int row_size, int column_size, int 
             add_multiplied_row_to_another(&(*matrix), i, pivot_row, row_size, current_value * -1.0);
         }
     }
+}
+
+//returns the column of the variable that is degenerated
+int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity)
+{
+    int is_equal_zero = 0;
+    for (int i = 1; i < variables_quantity; i++)
+    {
+        is_equal_zero = double_is_equal(matrix[variable_list[i].pos_row_of_one][row_length - 1], 0.000);
+
+        if (variable_list[i].in_base && is_equal_zero)
+        {
+
+            return i;
+        }
+    }
+    return -1;
 }
