@@ -16,6 +16,7 @@ int get_pivot_row(double **matrix, int row_size, int column_size, int simplex_co
 void make_column_canonical(double ***matrix, int row_size, int column_size, int pivot_row, int pivot_column);
 void make_artficials_canonical(double ***matrix, int row_size, int column_size, int* quantity_of_vars);
 void kick_out_var_from_base(Variable **variable_list, int total_variables, int pivot_row, int column_to_join);
+int get_artificial_column_in_base(double **matrix, int row_size, int column_size, int* quantity_of_vars);
 
 
 #define INFINIT 9999
@@ -25,6 +26,8 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
 {
     int column_to_maximize;
     int pivot_row;
+
+    int artificial_column;
 
     int total_variables = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2] + quantity_of_vars[3];
     if (quantity_of_vars[3] != 0)
@@ -71,7 +74,18 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
         make_column_canonical(&(*matrix), row_size, column_size, pivot_row, column_to_maximize);
     }
 
+    artificial_column = get_artificial_column_in_base(*matrix, row_size, column_size, quantity_of_vars);
+
+    if (artificial_column != -1)
+    {
+        write_final_table(*matrix, row_size, column_size, quantity_of_vars, varName_list);
+        write_not_feasible_solution(*matrix, row_size, column_size, quantity_of_vars, 
+                            varName_list, artificial_column, variable_list, total_variables);
+        return 0;
+    }
+        
     return 1;
+
 }
 
 //RETURNS 1 IF A SOLUTION IS FOUND, -1 IF IT IS NOT BOUNDED, 0 IF IT IS NOT DEASIBLE SOLUTION
@@ -267,6 +281,7 @@ void make_artficials_canonical(double ***matrix, int row_size, int column_size, 
     int column_pos = row_size - 2;  //-2 = -1 for result column &  -1 for the last artficial variable
     int artificial_row_pivot_pos;
 
+    int total_variables = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2];
     while (artificial_remaining--)
     {
         artificial_row_pivot_pos = get_artificial_row_pivot((*matrix), column_size, column_pos);
@@ -275,8 +290,26 @@ void make_artficials_canonical(double ***matrix, int row_size, int column_size, 
 
         column_pos--;
 
-        variable_list[quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2] + artificial_remaining + 1].in_base = 1;
+        variable_list[total_variables + artificial_remaining + 1].in_base = 1;
     }
+}
+
+//returns -1 if there isnt artificial in base
+int get_artificial_column_in_base(double **matrix, int row_size, int column_size, int* quantity_of_vars)
+{
+    int artificial_remaining = quantity_of_vars[3];
+    int artificial_column_pos = -1;
+
+    int total_variables = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2];
+    while (artificial_remaining--)
+    {
+        artificial_column_pos = total_variables + artificial_remaining + 1;
+
+        if (variable_list[artificial_column_pos].in_base == 1)
+            return artificial_column_pos;
+
+    }
+    return -1;
 }
 
 int get_artificial_row_pivot(double **matrix, int column_size, int column_pos)
