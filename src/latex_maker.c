@@ -35,8 +35,12 @@ void write_not_feasible_solution(double **matrix, int row_length, int column_len
 void write_degenerate_problem(double **matrix, int row_length, int column_length, 
 				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
 				Variable *variable_list, int variables_quantity);
+	
+void write_multiple_solution(int *quantity_of_vars, double *solution1, double *solution2, double* solution3, double* solution4);
 
 void exchange_degenerate_problem(void);
+
+void write_pivot_divisions(Pivot_division *divisions, int size, int pivot_row);
 
 void begin_frame(char* frame_title);
 void end_frame(void);
@@ -58,7 +62,7 @@ void startPresentation(void)
 	fprintf(file, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", 
 			"\\documentclass{beamer}\n\\usepackage{listings}\n\\usepackage{setspace}\n\\usepackage[utf8]{inputenc}\n\\usepackage{pgfplots}\n\\usepackage{lmodern}\n\\usepackage{newverbs}\n\\usepackage{natbib}\n\\pgfplotsset{compat=1.13}\n\\setlength\\parindent{20pt}", 
 			"\\usetheme{Warsaw}\n\\newcommand\\tab[1][1cm]{\\hspace*{#1}}\n\\usepackage{array, longtable}\n\\usepackage{tabu}\n"
-			"\\usepackage{xcolor}\n\\usepackage{colortbl}\n",
+			"\\usepackage{xcolor}\n\\usepackage{colortbl}\n\\usepackage{amsmath}\n",
 			"\\setbeamercolor{normal text}{fg=white,bg=black!90}\n\\setbeamercolor{structure}{fg=white}\n\\setbeamercolor{alerted text}{fg=red!85!black}\n\\setbeamercolor{item projected}{use=item,fg=black,bg=item.fg!35}\n\\setbeamercolor*{palette primary}{use=structure,fg=structure.fg}\n\\setbeamercolor*{palette secondary}{use=structure,fg=structure.fg!95!black}\n\\setbeamercolor*{palette tertiary}{use=structure,fg=structure.fg!90!black}\n\\setbeamercolor*{palette quaternary}{use=structure,fg=structure.fg!95!black,bg=green!80}\n\\setbeamercolor*{framesubtitle}{fg=white}\n\\setbeamercolor*{block title}{parent=structure,bg=black!60}\n\\setbeamercolor*{block body}{fg=gray,bg=black!10}\n\\setbeamercolor*{block title alerted}{parent=alerted text,bg=black!15}\n\\setbeamercolor*{block title example}{parent=example text,bg=black!15}",
 			"\\title{Proyecto 4: Otro SIMPLEX m\\'as}",
 			"\\subtitle{Investigaci\\'on de Operaciones \\newline Semestre 1}",
@@ -709,6 +713,61 @@ void write_not_feasible_solution(double **matrix, int row_length, int column_len
 	 end_frame();
 }
 
+void write_multiple_solution(int *quantity_of_vars, double *solution1, double *solution2, double* solution3, double* solution4)
+{
+	double alpha1 = 0.5;
+	double alpha2 = 0.25;
+	begin_frame("Soluciones M\\'ultiples Cont.");
+	fprintf(file, "\\textbf{Ecuaci\\'on}\\\\\n\\begin{align}\n");
+	fprintf(file, "\\alpha \\begin{bmatrix}\n");
+	for (int i = 0; i < quantity_of_vars[0]; i++)
+	{
+		fprintf(file, "%.2f%s\n", solution1[i], i + 1 == quantity_of_vars[0] ? "" : "\\\\");
+	}
+	fprintf(file, "\\end{bmatrix} + (1 - \\alpha) \\begin{bmatrix}\n");
+	for (int i = 0; i < quantity_of_vars[0]; i++)
+	{
+		fprintf(file, "%.2f%s\n", solution2[i], i + 1 == quantity_of_vars[0] ? "" : "\\\\");
+	}
+	fprintf(file, "\\end{bmatrix}\\\\\\\\\n");
+	fprintf(file, "[");
+	for (int i = 0; i < quantity_of_vars[0]; i++)
+	{
+		fprintf(file, "%.2f;  ", alpha1 * solution1[i] + ((1 - alpha1) * solution2[i]));
+	}
+	fprintf(file, "] (\\alpha = %.2f)\\\\\n", alpha1);
+
+	fprintf(file, "[");
+	for (int i = 0; i < quantity_of_vars[0]; i++)
+	{
+		fprintf(file, "%.2f;  ", alpha2 * solution1[i] + (1 - alpha2) * solution2[i]);
+	}
+	fprintf(file, "] (\\alpha = %.2f)\n", alpha2);
+	fprintf(file, "\\end{align}");
+
+	
+	
+	end_frame();
+}
+
+void write_pivot_divisions(Pivot_division *divisions, int size, int pivot_row)
+{
+	fprintf(file, "\\[\n");
+	for (int i = 0; i < size; i++)
+	{
+		if (divisions[i].divided)
+		{
+			if (i == pivot_row - 2)
+				fprintf(file, "\\textcolor{green!100}{\\dfrac{%.2f}{%.2f} = %.2f;}  ", divisions[i].a, divisions[i].b, divisions[i].result);
+
+			else
+				fprintf(file, "\\dfrac{%.2f}{%.2f} = %.2f;  ", divisions[i].a, divisions[i].b, divisions[i].result);
+		}
+	}
+	
+	fprintf(file, "\n\\]\n");
+}
+
 void write_degenerate_problem(double **matrix, int row_length, int column_length, 
 				int *quantity_of_vars, GtkWidget** varName_list, int column_choose,
 				Variable *variable_list, int variables_quantity)
@@ -731,13 +790,11 @@ void exchange_degenerate_problem(void)
 {
 	char in_char;
 	file_aux = fopen("../latex/degenerated.txt", "r");
-	printf("IS HERE 1!\n");
 	while ((in_char = fgetc(file_aux)) != EOF)
 	{
 		fprintf(file, "%c", in_char);
 	}
 	fclose(file_aux);
-	printf("IS HERE 2!\n");
 	remove("../latex/degenerated.txt");
 }
 

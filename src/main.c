@@ -258,6 +258,7 @@ void calculate_solution(void)
 		write_final_table(simplex_matrix, row_length, column_length, quantity_of_vars, varName_list);
 	}
 	write_problem_solution(variable_list, quantity_of_vars, simplex_matrix, row_length);
+	search_another_optimal_solution(&simplex_matrix,row_length, column_length, variable_list, quantity_of_vars);
 
 	gtk_widget_show(message_dialog);
 	gtk_widget_hide(objective_contraints_window);

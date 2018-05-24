@@ -18,6 +18,9 @@ void make_artficials_canonical(double ***matrix, int row_size, int column_size, 
 void kick_out_var_from_base(Variable **variable_list, int total_variables, int pivot_row, int column_to_join);
 int get_artificial_column_in_base(double **matrix, int row_size, int column_size, int* quantity_of_vars);
 int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity);
+void search_another_optimal_solution(double ***matrix, int row_length, int column_length, Variable* variable_list, 
+                                            int *quantity_of_vars);
+void get_solution_of_vars(double** matrix, int row_length, int* quantity_of_vars, double** let_solution, Variable* variable_list);
 
 
 #define INFINIT 9999
@@ -57,7 +60,6 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
             begin_frame("Tabla Intermedia");
             write_table_with_color(*matrix, row_size, column_size, quantity_of_vars, 
                         varName_list, column_to_maximize, -1, "blue", "Tabla Intermedia",  variable_list, total_variables);
-            end_frame();
         }
 
         pivot_row = get_pivot_row(*matrix, column_size, row_size, column_to_maximize);
@@ -150,7 +152,7 @@ int minimize_algorithm(double ***matrix, int row_size, int column_size, int* qua
             begin_frame("Tabla Intermedia");
             write_table_with_color(*matrix, row_size, column_size, quantity_of_vars, 
                 varName_list, column_to_minimize, -1, "blue", "Tabla Intermedia",  variable_list, total_variables);
-            end_frame();
+        
         }
 
           
@@ -401,6 +403,9 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
 
     double current_value;
     double current_division;
+    int are_divisions = 0;
+
+    Pivot_division *division = calloc(column_size - 2, sizeof(Pivot_division));
 
     srand((unsigned) time(&t));
 
@@ -410,6 +415,14 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
         if (current_value > 0)
         {
             current_division = matrix[i][row_size - 1] / current_value;
+
+            division[i - 2].divided = 1;
+            division[i - 2].a = matrix[i][row_size - 1];
+            division[i - 2].b = current_value;
+            division[i - 2].result = current_division;
+
+            are_divisions = 1;
+
             if (current_division < minor_division)
             {
                 minor_division = current_division;
@@ -430,6 +443,12 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
             return pivot_row;
         else 
             return pivot_row_same;
+    }
+
+    if (are_divisions && write_intermediate_tables)
+    {
+        write_pivot_divisions(division, column_size - 2, pivot_row);
+        end_frame();
     }
 
     return pivot_row;
@@ -490,4 +509,55 @@ int verify_degenerated(double **matrix, int row_length, Variable *variable_list,
         }
     }
     return -1;
+}
+
+void search_another_optimal_solution(double ***matrix, int row_length, int column_length, Variable* variable_list, 
+                                            int *quantity_of_vars)
+{
+    int pivot_row;
+    double *solution1 = calloc(quantity_of_vars[0], sizeof(double));
+    get_solution_of_vars(*matrix, row_length, quantity_of_vars, &solution1, variable_list);
+
+    int total_variables = quantity_of_vars[0] + quantity_of_vars[1] + quantity_of_vars[2] + quantity_of_vars[3];
+
+    double *solution2 = calloc(quantity_of_vars[0], sizeof(double));
+    double *solution3 = calloc(quantity_of_vars[0], sizeof(double));
+    double *solution4 = calloc(quantity_of_vars[0], sizeof(double));
+
+    for (int i = 1; i < row_length - quantity_of_vars[3] - 1; i++)
+    {
+        if (double_is_equal((*matrix)[0][i], 0.000) && !variable_list[i].in_base)
+        {
+            pivot_row = get_pivot_row(*matrix, column_length, row_length, i);
+
+            if (pivot_row != -1)
+            {
+                begin_frame("Soluciones M\\'ultiples");
+                write_table_with_color(*matrix, row_length, column_length, quantity_of_vars, 
+                            varName_list, i, -1, "green", "Soluciones M\\'ultiples",  variable_list, total_variables);
+                end_frame();
+
+                make_column_canonical(&(*matrix), row_length, column_length, pivot_row, i);
+                kick_out_var_from_base(&variable_list, 
+                            total_variables, 
+                            pivot_row, i);
+
+                get_solution_of_vars(*matrix, row_length, quantity_of_vars, &solution2, variable_list);
+                write_multiple_solution(quantity_of_vars, solution1, solution2, solution3, solution4);
+                break;
+            }
+        }
+    }
+}
+
+void get_solution_of_vars(double** matrix, int row_length, int* quantity_of_vars, double** let_solution, Variable* variable_list)
+{
+    for (int i = 1; i < quantity_of_vars[0] + 1; i++)
+    {
+        if (variable_list[i].in_base)
+            (*let_solution)[i - 1] = matrix[variable_list[i].pos_row_of_one][row_length - 1];
+        
+        else
+            (*let_solution)[i - 1] = 0.000;
+    }
 }
