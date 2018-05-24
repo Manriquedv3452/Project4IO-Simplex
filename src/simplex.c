@@ -414,7 +414,7 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
     for (int i = 2; i < column_size; i++)
     {
         current_value = matrix[i][simplex_column];
-        if (current_value > 0)
+        if (current_value > 0.000)
         {
             current_division = matrix[i][row_size - 1] / current_value;
 
