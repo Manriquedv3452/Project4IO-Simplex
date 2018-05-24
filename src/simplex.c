@@ -439,6 +439,12 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
     }
 
 
+    if (are_divisions && write_intermediate_tables)
+        write_pivot_divisions(division, column_size - 2, pivot_row);
+        
+    if (write_intermediate_tables)
+        end_frame();
+        
     if (pivot_row_same != -1)
     {
         if (rand() % 2)
@@ -446,12 +452,6 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
         else 
             return pivot_row_same;
     }
-
-    if (are_divisions && write_intermediate_tables)
-        write_pivot_divisions(division, column_size - 2, pivot_row);
-        
-    if (write_intermediate_tables)
-        end_frame();
 
     return pivot_row;
 }
@@ -530,6 +530,7 @@ void search_another_optimal_solution(double ***matrix, int row_length, int colum
     {
         if (double_is_equal((*matrix)[0][i], 0.000) && !variable_list[i].in_base)
         {
+            write_intermediate_tables = 0;
             pivot_row = get_pivot_row(*matrix, column_length, row_length, i);
 
             if (pivot_row != -1)
