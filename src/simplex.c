@@ -17,13 +17,13 @@ void make_column_canonical(double ***matrix, int row_size, int column_size, int 
 void make_artficials_canonical(double ***matrix, int row_size, int column_size, int* quantity_of_vars);
 void kick_out_var_from_base(Variable **variable_list, int total_variables, int pivot_row, int column_to_join);
 int get_artificial_column_in_base(double **matrix, int row_size, int column_size, int* quantity_of_vars);
-int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity);
+int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity, int *quantity_of_vars);
 void search_another_optimal_solution(double ***matrix, int row_length, int column_length, Variable* variable_list, 
                                             int *quantity_of_vars);
 void get_solution_of_vars(double** matrix, int row_length, int* quantity_of_vars, double** let_solution, Variable* variable_list);
 
 
-#define INFINIT 9999
+#define INFINIT 9999999
 
 //RETURNS 1 IF A SOLUTION IS FOUND, -1 IF IT IS NOT BOUNDED, 0 IF IT IS NOT DEASIBLE SOLUTION
 int maximize_algorithm(double ***matrix, int row_size, int column_size, int *quantity_of_vars)
@@ -43,7 +43,8 @@ int maximize_algorithm(double ***matrix, int row_size, int column_size, int *qua
     {
         if (degenerated_problem_column == -1)
         {
-            degenerated_problem_column = verify_degenerated(*matrix, row_size, variable_list, total_variables);
+            degenerated_problem_column = verify_degenerated(*matrix, row_size, variable_list, 
+                                                total_variables, quantity_of_vars);
             if (degenerated_problem_column != -1)
                 write_degenerate_problem(*matrix, row_size, column_size, quantity_of_vars, 
                             varName_list, degenerated_problem_column, variable_list, total_variables);
@@ -134,7 +135,8 @@ int minimize_algorithm(double ***matrix, int row_size, int column_size, int* qua
 
         if (degenerated_problem_column == -1)
         {
-            degenerated_problem_column = verify_degenerated(*matrix, row_size, variable_list, total_variables);
+            degenerated_problem_column = verify_degenerated(*matrix, row_size, variable_list, 
+                                            total_variables, quantity_of_vars);
             if (degenerated_problem_column != -1)
                 write_degenerate_problem(*matrix, row_size, column_size, quantity_of_vars, 
                             varName_list, degenerated_problem_column, variable_list, total_variables);
@@ -495,10 +497,10 @@ void make_column_canonical(double ***matrix, int row_size, int column_size, int 
 }
 
 //returns the column of the variable that is degenerated
-int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity)
+int verify_degenerated(double **matrix, int row_length, Variable *variable_list, int variables_quantity, int* quantity_of_vars)
 {
     int is_equal_zero = 0;
-    for (int i = 1; i < variables_quantity; i++)
+    for (int i = 1; i < variables_quantity - quantity_of_vars[3]; i++)
     {
         is_equal_zero = double_is_equal(matrix[variable_list[i].pos_row_of_one][row_length - 1], 0.000);
 
