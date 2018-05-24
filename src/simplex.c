@@ -446,10 +446,10 @@ int get_pivot_row(double **matrix, int column_size, int row_size, int simplex_co
     }
 
     if (are_divisions && write_intermediate_tables)
-    {
         write_pivot_divisions(division, column_size - 2, pivot_row);
+        
+    if (write_intermediate_tables)
         end_frame();
-    }
 
     return pivot_row;
 }
