@@ -58,8 +58,8 @@ y solución del problema.
     <property name="name">objective_contraints_window</property>
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
-    <property name="default_width">897</property>
-    <property name="default_height">400</property>
+    <property name="default_width">1200</property>
+    <property name="default_height">600</property>
     <property name="gravity">center</property>
     <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
     <child>
@@ -86,7 +86,7 @@ y solución del problema.
         <child>
           <object class="GtkScrolledWindow" id="scrolled_objFunction">
             <property name="name">384</property>
-            <property name="width_request">800</property>
+            <property name="width_request">1100</property>
             <property name="height_request">68</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -193,8 +193,8 @@ y solución del problema.
         </child>
         <child>
           <object class="GtkScrolledWindow" id="scrolled_constraints">
-            <property name="width_request">800</property>
-            <property name="height_request">86</property>
+            <property name="width_request">1100</property>
+            <property name="height_request">247</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="shadow_type">in</property>
@@ -258,7 +258,7 @@ y solución del problema.
           </object>
           <packing>
             <property name="x">409</property>
-            <property name="y">335</property>
+            <property name="y">504</property>
           </packing>
         </child>
         <child>
@@ -273,7 +273,7 @@ y solución del problema.
           </object>
           <packing>
             <property name="x">127</property>
-            <property name="y">340</property>
+            <property name="y">511</property>
           </packing>
         </child>
       </object>

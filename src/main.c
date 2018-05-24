@@ -138,7 +138,7 @@ void show_objfunction_constraints_fileds(void)
 		gtk_grid_attach(GTK_GRID(grid_constraints), lbl_varName, i, 0, 1, 1);
 
 		adjustment = gtk_adjustment_new(1.0, -999999, 999999, 1, 10, 0);
-		constraints_objFunction_matrix[0][i] = gtk_spin_button_new(adjustment, 0, 4);
+		constraints_objFunction_matrix[0][i] = gtk_spin_button_new(adjustment, 0, 5);
 		gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(constraints_objFunction_matrix[0][i]), TRUE);
 		gtk_grid_attach(GTK_GRID(grid_objFunction),constraints_objFunction_matrix[0][i], i, 1, 1, 1);
 	}
@@ -161,7 +161,7 @@ void fill_constraints_grid(void)
 		for (int j = 0; j < var_quantity; j++)
 		{
 			adjustment = gtk_adjustment_new(1.0, -999999, 999999, 1, 10, 0);
-			constraints_objFunction_matrix[i][j] = gtk_spin_button_new(adjustment, 0, 4);
+			constraints_objFunction_matrix[i][j] = gtk_spin_button_new(adjustment, 0, 5);
 			gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i][j]), TRUE);
 			gtk_grid_attach(GTK_GRID(grid_constraints), constraints_objFunction_matrix[i][j], j, i + 1, 1, 1);
 		}
@@ -175,7 +175,7 @@ void fill_constraints_grid(void)
 						constraints_objFunction_matrix[i][constraint_length], constraint_length, i + 1, 1, 1);
 
 		adjustment = gtk_adjustment_new(1, -999999, 999999, 1, 10, 0);
-		constraints_objFunction_matrix[i][constraint_length + 1] = gtk_spin_button_new(adjustment, 0, 4);
+		constraints_objFunction_matrix[i][constraint_length + 1] = gtk_spin_button_new(adjustment, 0, 5);
 		gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(constraints_objFunction_matrix[i][constraint_length + 1]), TRUE);
 
 		gtk_grid_attach(GTK_GRID(grid_constraints), constraints_objFunction_matrix[i][constraint_length + 1], 
